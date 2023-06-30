@@ -4,7 +4,7 @@ const Card = require('../models/card');
 module.exports.getCards = (req, res) => {
   Card.find({})
     .then((cards) => res.status(200).send({ data: cards }))
-    .catch(() => res.status(INTERNAL_SERVER_ERROR).send('Ошибка по умолчанию.'));
+    .catch(() => res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка по умолчанию.' }));
 };
 
 module.exports.createCard = (req, res) => {
@@ -13,9 +13,9 @@ module.exports.createCard = (req, res) => {
     .then((card) => res.status(200).send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).send('Переданы некорректные данные при обновлении профиля.');
+        return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при обновлении профиля.' });
       }
-      return res.status(INTERNAL_SERVER_ERROR).send('Ошибка по умолчанию.');
+      return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка по умолчанию.' });
     });
 };
 
@@ -23,14 +23,19 @@ module.exports.deleteCard = (req, res) => {
   Card.findById({ _id: req.params.cardId })
     .then((card) => {
       if (!card) {
-        return res.status(NOT_FOUND).send('Карточка с указанным _id не найдена.');
+        return res.status(NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена.' });
       }
       return Card.findByIdAndRemove(req.params.cardId)
         .then(() => {
           res.status(200).send({ _id: req.params.cardId });
         });
     })
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => {
+      if (err.kind === 'ObjectId') {
+        return res.status(BAD_REQUEST).send({ message: 'Некорректный формат id.' });
+      }
+      return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка по умолчанию.' });
+    });
 };
 
 module.exports.addLike = (req, res) => {
@@ -41,15 +46,18 @@ module.exports.addLike = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        return res.status(NOT_FOUND).send('Передан несуществующий _id карточки.');
+        return res.status(NOT_FOUND).send({ message: 'Передан несуществующий _id карточки.' });
       }
       return res.status(200).send({ _id: req.params.cardId });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).send('Переданы некорректные данные для постановки/снятии лайка. ');
+        return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
       }
-      return res.status(INTERNAL_SERVER_ERROR).send('Ошибка по умолчанию.');
+      if (err.kind === 'ObjectId') {
+        return res.status(BAD_REQUEST).send({ message: 'Некорректный формат id.' });
+      }
+      return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка по умолчанию.' });
     });
 };
 
@@ -61,14 +69,17 @@ module.exports.removeLike = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        return res.status(NOT_FOUND).send('Передан несуществующий _id карточки.');
+        return res.status(NOT_FOUND).send({ message: 'Передан несуществующий _id карточки.' });
       }
       return res.status(200).send({ _id: req.params.cardId });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).send('Переданы некорректные данные для постановки/снятии лайка. ');
+        return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
       }
-      return res.status(INTERNAL_SERVER_ERROR).send('Ошибка по умолчанию.');
+      if (err.kind === 'ObjectId') {
+        return res.status(BAD_REQUEST).send({ message: 'Некорректный формат id.' });
+      }
+      return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка по умолчанию.' });
     });
 };
