@@ -3,7 +3,7 @@ const User = require('../models/user');
 
 module.exports.getAllUsers = (req, res) => {
   User.find({})
-    .then((users) => res.status(200).send({ data: users }))
+    .then((users) => res.send({ data: users }))
     .catch(() => res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка по умолчанию.' }));
 };
 
@@ -24,15 +24,16 @@ module.exports.getUser = (req, res) => {
   const { userId } = req.params;
 
   User.findById(userId)
+    .orFail(new Error('NotFound'))
     .then((user) => {
-      if (!user) {
-        return res.status(NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден' });
-      }
-      return res.status(200).send({ data: user });
+      res.send({ data: user });
     })
     .catch((err) => {
       if (err.kind === 'ObjectId') {
         return res.status(BAD_REQUEST).send({ message: 'Некорректный формат id.' });
+      }
+      if (err.messsage === 'NotFound') {
+        return res.status(NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден' });
       }
       return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка по умолчанию.' });
     });
@@ -41,15 +42,16 @@ module.exports.getUser = (req, res) => {
 module.exports.updateUserInfo = (req, res) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true, context: 'query' })
+    .orFail(new Error('NotFound'))
     .then((user) => {
-      if (!user) {
-        return res.status(NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден' });
-      }
-      return res.status(200).send({ data: user });
+      res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при обновлении профиля.' });
+      }
+      if (err.messsage === 'NotFound') {
+        return res.status(NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден' });
       }
       return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка по умолчанию.' });
     });
@@ -58,15 +60,16 @@ module.exports.updateUserInfo = (req, res) => {
 module.exports.updateUserAvatar = (req, res) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true, context: 'query' })
+    .orFail(new Error('NotFound'))
     .then((user) => {
-      if (!user) {
-        return res.status(NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден' });
-      }
-      return res.status(200).send({ data: user });
+      res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при обновлении профиля.' });
+      }
+      if (err.messsage === 'NotFound') {
+        return res.status(NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден' });
       }
       return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка по умолчанию.' });
     });
