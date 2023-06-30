@@ -4,7 +4,7 @@ const Card = require('../models/card');
 module.exports.getCards = (req, res) => {
   Card.find({})
     .then((cards) => res.status(200).send({ data: cards }))
-    .catch((err) => res.status(INTERNAL_SERVER_ERROR).send('Ошибка по умолчанию.'));
+    .catch(() => res.status(INTERNAL_SERVER_ERROR).send('Ошибка по умолчанию.'));
 };
 
 module.exports.createCard = (req, res) => {
@@ -20,24 +20,22 @@ module.exports.createCard = (req, res) => {
 };
 
 module.exports.deleteCard = (req, res) => {
-  const cardId = req.params.cardId;
-  Card.findById({ _id: cardId })
+  Card.findById({ _id: req.params.cardId })
     .then((card) => {
       if (!card) {
         return res.status(NOT_FOUND).send('Карточка с указанным _id не найдена.');
       }
-      return Card.findByIdAndRemove(cardId)
+      return Card.findByIdAndRemove(req.params.cardId)
         .then(() => {
-          res.status(200).send({ _id: cardId });
+          res.status(200).send({ _id: req.params.cardId });
         });
     })
     .catch((err) => res.status(500).send({ message: err.message }));
 };
 
 module.exports.addLike = (req, res) => {
-  const cardId = req.params.cardId;
   Card.findByIdAndUpdate(
-    { _id: cardId },
+    { _id: req.params.cardId },
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
@@ -45,7 +43,7 @@ module.exports.addLike = (req, res) => {
       if (!card) {
         return res.status(NOT_FOUND).send('Передан несуществующий _id карточки.');
       }
-      return res.status(200).send({ _id: cardId });
+      return res.status(200).send({ _id: req.params.cardId });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -56,9 +54,8 @@ module.exports.addLike = (req, res) => {
 };
 
 module.exports.removeLike = (req, res) => {
-  const cardId = req.params.cardId;
   Card.findByIdAndUpdate(
-    { _id: cardId },
+    { _id: req.params.cardId },
     { $pull: { likes: req.user._id } },
     { new: true },
   )
@@ -66,7 +63,7 @@ module.exports.removeLike = (req, res) => {
       if (!card) {
         return res.status(NOT_FOUND).send('Передан несуществующий _id карточки.');
       }
-      return res.status(200).send({ _id: cardId });
+      return res.status(200).send({ _id: req.params.cardId });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {

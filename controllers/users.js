@@ -4,7 +4,7 @@ const User = require('../models/user');
 module.exports.getAllUsers = (req, res) => {
   User.find({})
     .then((users) => res.status(200).send({ data: users }))
-    .catch((err) => res.status(INTERNAL_SERVER_ERROR).send('Ошибка по умолчанию.'));
+    .catch(() => res.status(INTERNAL_SERVER_ERROR).send('Ошибка по умолчанию.'));
 };
 
 module.exports.createUser = (req, res) => {
@@ -30,7 +30,7 @@ module.exports.getUser = (req, res) => {
       }
       return res.status(200).send({ data: user });
     })
-    .catch((err) => res.status(INTERNAL_SERVER_ERROR).send('Ошибка по умолчанию.'));
+    .catch(() => res.status(INTERNAL_SERVER_ERROR).send('Ошибка по умолчанию.'));
 };
 
 module.exports.updateUserInfo = (req, res) => {
