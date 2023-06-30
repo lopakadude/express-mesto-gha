@@ -42,7 +42,7 @@ module.exports.getUser = (req, res) => {
 module.exports.updateUserInfo = (req, res) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true, context: 'query' })
-    .orFail(new Error('NotFound'))
+    .orFail(err.messsage === 'NotFound')
     .then((user) => {
       res.send({ data: user });
     })
