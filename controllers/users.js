@@ -41,15 +41,16 @@ module.exports.getUser = (req, res) => {
 module.exports.updateUserInfo = (req, res) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true, context: 'query' })
+    .orFail(new Error('NotFound'))
     .then((user) => {
-      if (!user) {
-        return res.status(NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден' });
-      }
-      return res.status(200).send({ data: user });
+      res.status(200).send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при обновлении профиля.' });
+      }
+      if (err.message === 'NotFound') {
+        return res.status(NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден' });
       }
       return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка по умолчанию.' });
     });
@@ -57,15 +58,16 @@ module.exports.updateUserInfo = (req, res) => {
 module.exports.updateUserAvatar = (req, res) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true, context: 'query' })
+    .orFail(new Error('NotFound'))
     .then((user) => {
-      if (!user) {
-        return res.status(NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден' });
-      }
-      return res.status(200).send({ data: user });
+      res.status(200).send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при обновлении профиля.' });
+      }
+      if (err.message === 'NotFound') {
+        return res.status(NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден' });
       }
       return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка по умолчанию.' });
     });

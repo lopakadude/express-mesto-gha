@@ -21,11 +21,9 @@ module.exports.createCard = (req, res) => {
 
 module.exports.deleteCard = (req, res) => {
   Card.findById({ _id: req.params.cardId })
-    .then((card) => {
-      if (!card) {
-        return res.status(NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена.' });
-      }
-      return Card.findByIdAndRemove(req.params.cardId)
+    .orFail(new Error('NotFound'))
+    .then(() => {
+      Card.findByIdAndRemove(req.params.cardId)
         .then(() => {
           res.status(200).send({ _id: req.params.cardId });
         });
@@ -33,6 +31,9 @@ module.exports.deleteCard = (req, res) => {
     .catch((err) => {
       if (err.kind === 'ObjectId') {
         return res.status(BAD_REQUEST).send({ message: 'Некорректный формат id.' });
+      }
+      if (err.message === 'NotFound') {
+        return res.status(NOT_FOUND).send({ message: 'Карточка по указанному _id не найдена' });
       }
       return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка по умолчанию.' });
     });
@@ -44,11 +45,9 @@ module.exports.addLike = (req, res) => {
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
-    .then((card) => {
-      if (!card) {
-        return res.status(NOT_FOUND).send({ message: 'Передан несуществующий _id карточки.' });
-      }
-      return res.status(200).send({ _id: req.params.cardId });
+    .orFail(new Error('NotFound'))
+    .then(() => {
+      res.status(200).send({ _id: req.params.cardId });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -56,6 +55,9 @@ module.exports.addLike = (req, res) => {
       }
       if (err.kind === 'ObjectId') {
         return res.status(BAD_REQUEST).send({ message: 'Некорректный формат id.' });
+      }
+      if (err.message === 'NotFound') {
+        return res.status(NOT_FOUND).send({ message: 'Карточка по указанному _id не найдена' });
       }
       return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка по умолчанию.' });
     });
@@ -67,11 +69,9 @@ module.exports.removeLike = (req, res) => {
     { $pull: { likes: req.user._id } },
     { new: true },
   )
-    .then((card) => {
-      if (!card) {
-        return res.status(NOT_FOUND).send({ message: 'Передан несуществующий _id карточки.' });
-      }
-      return res.status(200).send({ _id: req.params.cardId });
+    .orFail(new Error('NotFound'))
+    .then(() => {
+      res.status(200).send({ _id: req.params.cardId });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -80,7 +80,9 @@ module.exports.removeLike = (req, res) => {
       if (err.kind === 'ObjectId') {
         return res.status(BAD_REQUEST).send({ message: 'Некорректный формат id.' });
       }
+      if (err.message === 'NotFound') {
+        return res.status(NOT_FOUND).send({ message: 'Карточка по указанному _id не найдена' });
+      }
       return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка по умолчанию.' });
     });
 };
-
