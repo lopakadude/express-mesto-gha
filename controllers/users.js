@@ -40,7 +40,7 @@ module.exports.getUser = (req, res) => {
 
 module.exports.updateUserInfo = (req, res) => {
   const { name, about } = req.body;
-  User.findByIdAndUpdate(req.user._id, { name, about }, { runValidators: true, context: 'query' })
+  User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true, context: 'query' })
     .then((user) => {
       if (!user) {
         return res.status(NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден' });
@@ -57,7 +57,7 @@ module.exports.updateUserInfo = (req, res) => {
 
 module.exports.updateUserAvatar = (req, res) => {
   const { avatar } = req.body;
-  User.findByIdAndUpdate(req.user._id, { avatar }, { runValidators: true, context: 'query' })
+  User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true, context: 'query' })
     .then((user) => {
       if (!user) {
         return res.status(NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден' });
