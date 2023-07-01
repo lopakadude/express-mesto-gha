@@ -3,6 +3,7 @@ const Card = require('../models/card');
 
 module.exports.getCards = (req, res) => {
   Card.find({})
+    .populate('owner')
     .then((cards) => res.send({ data: cards }))
     .catch(() => res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка по умолчанию.' }));
 };
@@ -20,12 +21,14 @@ module.exports.createCard = (req, res) => {
 };
 
 module.exports.deleteCard = (req, res) => {
-  Card.findById({ _id: req.params.cardId })
+  const { cardId } = req.params;
+  Card.findById({ _id: cardId })
     .orFail(new Error('NotFound'))
-    .then(() => {
-      Card.findByIdAndRemove(req.params.cardId)
+    .populate('owner')
+    .then((card) => {
+      Card.findByIdAndRemove(cardId)
         .then(() => {
-          res.status(200).send({ _id: req.params.cardId });
+          res.status(200).send({ data: card });
         });
     })
     .catch((err) => {
@@ -40,14 +43,16 @@ module.exports.deleteCard = (req, res) => {
 };
 
 module.exports.addLike = (req, res) => {
+  const { cardId } = req.params;
   Card.findByIdAndUpdate(
-    { _id: req.params.cardId },
+    { _id: cardId },
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
     .orFail(new Error('NotFound'))
-    .then(() => {
-      res.status(200).send({ _id: req.params.cardId });
+    .populate('owner')
+    .then((card) => {
+      res.status(200).send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -64,14 +69,16 @@ module.exports.addLike = (req, res) => {
 };
 
 module.exports.removeLike = (req, res) => {
+  const { cardId } = req.params;
   Card.findByIdAndUpdate(
-    { _id: req.params.cardId },
+    { _id: cardId },
     { $pull: { likes: req.user._id } },
     { new: true },
   )
     .orFail(new Error('NotFound'))
-    .then(() => {
-      res.status(200).send({ _id: req.params.cardId });
+    .populate('owner')
+    .then((card) => {
+      res.status(200).send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
