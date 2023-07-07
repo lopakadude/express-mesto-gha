@@ -29,7 +29,7 @@ module.exports.deleteCard = (req, res) => {
       if (card.owner.toString() !== req.user._id) {
         return new Error('ForbiddenAction');
       }
-      Card.findByIdAndRemove(cardId)
+      return Card.findByIdAndRemove(cardId)
         .then(() => {
           res.status(200).send({ data: card });
         });

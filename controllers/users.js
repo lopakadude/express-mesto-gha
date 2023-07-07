@@ -22,9 +22,15 @@ module.exports.createUser = (req, res) => {
       email,
       password: hash,
     }))
-    .then((user) => res.status(201).send({ data: user }))
+    .then((user) => res.status(201).send({
+      _id: user._id,
+      name: user.name,
+      about: user.about,
+      email: user.email,
+      avatar: user.avatar,
+    }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'ValidationError' || err.message === 'Illegal arguments: undefined, number') {
         return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя.' });
       }
       if (err.code === 11000) {
@@ -44,7 +50,7 @@ module.exports.login = (req, res) => {
       });
     })
     .catch(() => {
-      res.status(BAD_REQUEST).send({ message: 'Неправильные почта или пароль' });
+      res.status(401).send({ message: 'Неправильные почта или пароль' });
     });
 };
 

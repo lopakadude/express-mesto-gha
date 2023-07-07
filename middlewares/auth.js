@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-module.exports = (req, res, next) => {
+module.exports = (req, res) => {
   const { authorization } = req.headers;
 
   if (!authorization || !authorization.startsWith('Bearer ')) {
@@ -19,5 +19,5 @@ module.exports = (req, res, next) => {
       .send({ message: 'Необходима авторизация' });
   }
   req.user = payload; // записываем пейлоуд в объект запроса
-  next(); // пропускаем запрос дальше
+  return req.user;
 };
