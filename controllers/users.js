@@ -49,8 +49,11 @@ module.exports.login = (req, res) => {
         token: jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '7d' }),
       });
     })
-    .catch(() => {
-      res.status(401).send({ message: 'Неправильные почта или пароль' });
+    .catch((err) => {
+      if (err.message === 'Illegal arguments: undefined, number') {
+        return res.status(BAD_REQUEST).send({ message: 'Неправильные почта или пароль' });
+      }
+      return res.status(401).send({ message: 'Неправильные почта или пароль' });
     });
 };
 
