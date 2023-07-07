@@ -1,11 +1,14 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
+const bodyParser = require('body-parser');
+const auth = require('./middlewares/auth');
+
+const app = express();
 
 const { PORT = 3000 } = process.env;
 
-const app = express();
-const bodyParser = require('body-parser');
+const { createUser, login } = require('./controllers/users');
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
   useNewUrlParser: true,
@@ -16,19 +19,14 @@ app.use(helmet());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '649ca36a8ee44606c4a7b9cf',
-  };
+app.post('/signin', login);
+app.post('/signup', createUser);
 
-  next();
-});
+app.use('/users', auth, require('./routes/users'));
 
-app.use('/users', require('./routes/users'));
+app.use('/cards', auth, require('./routes/cards'));
 
-app.use('/cards', require('./routes/cards'));
-
-app.use('*', (req, res) => {
+app.use('*', auth, (req, res) => {
   res.status(404).send({ message: 'Страница не существует' });
 });
 
