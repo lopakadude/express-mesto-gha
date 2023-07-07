@@ -26,6 +26,9 @@ module.exports.deleteCard = (req, res) => {
     .orFail(new Error('NotFound'))
     .populate('owner')
     .then((card) => {
+      if (card.owner.toString() !== req.user._id) {
+        return new Error('ForbiddenAction');
+      }
       Card.findByIdAndRemove(cardId)
         .then(() => {
           res.status(200).send({ data: card });
@@ -37,6 +40,9 @@ module.exports.deleteCard = (req, res) => {
       }
       if (err.message === 'NotFound') {
         return res.status(NOT_FOUND).send({ message: 'Карточка по указанному _id не найдена' });
+      }
+      if (err.message === 'ForbiddenAction') {
+        return res.status(NOT_FOUND).send({ message: 'Отсутствие прав на удаление карточки.' });
       }
       return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка по умолчанию.' });
     });

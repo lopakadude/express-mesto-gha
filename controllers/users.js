@@ -43,8 +43,8 @@ module.exports.login = (req, res) => {
         token: jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '7d' }),
       });
     })
-    .catch((err) => {
-      res.status(401).send({ message: err.message });
+    .catch(() => {
+      res.status(BAD_REQUEST).send({ message: 'Неправильные почта или пароль' });
     });
 };
 
