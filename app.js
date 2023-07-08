@@ -4,6 +4,7 @@ const helmet = require('helmet');
 const bodyParser = require('body-parser');
 const auth = require('./middlewares/auth');
 const centralError = require('./middlewares/centralError');
+const { errors } = require('./middlewares/celebrate');
 
 const app = express();
 
@@ -30,6 +31,8 @@ app.use('/cards', auth, require('./routes/cards'));
 app.use('*', auth, (req, res) => {
   res.status(404).send({ message: 'Страница не существует' });
 });
+
+app.use(errors());
 
 app.use(centralError);
 
