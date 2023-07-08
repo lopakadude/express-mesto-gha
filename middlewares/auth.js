@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const AuthorizationError = require('../errors/AuthorizationError');
 
-module.exports = (req, res) => {
+module.exports = (req, res, next) => {
   const { authorization } = req.headers;
 
   if (!authorization || !authorization.startsWith('Bearer ')) {
@@ -16,5 +16,5 @@ module.exports = (req, res) => {
     throw new AuthorizationError('Авторизация не пройдена. Неверный почта или пароль');
   }
   req.user = payload;
-  return req.user;
+  next();
 };
