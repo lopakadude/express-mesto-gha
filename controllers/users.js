@@ -30,7 +30,7 @@ module.exports.createUser = (req, res) => {
       avatar: user.avatar,
     }))
     .catch((err) => {
-      if (err.name === 'Error') {
+      if (err.name === 'ValidationError' || err.message === 'Illegal arguments: undefined, number'|| err.message === 'Illegal arguments: number, undefined') {
         return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя.' });
       }
       if (err.code === 11000) {
@@ -50,10 +50,13 @@ module.exports.login = (req, res) => {
       });
     })
     .catch((err) => {
-      if (err.name === 'Error') {
+      if (err.name === 'ValidationError' || err.message === 'Illegal arguments: undefined, number'|| err.message === 'Illegal arguments: number, undefined') {
         return res.status(BAD_REQUEST).send({ message: 'Неправильные почта или пароль' });
       }
-      return res.status(INTERNAL_SERVER_ERROR).send(err.name);
+			if (err.message === 'DoesntExist') {
+        return res.status(401).send({ message: 'Неправильные почта или пароль' });
+      }
+      return res.status(INTERNAL_SERVER_ERROR).send(err.message);
     });
 };
 
