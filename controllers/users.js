@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const { BAD_REQUEST, NOT_FOUND, INTERNAL_SERVER_ERROR } = require('../utils/constants');
+const { BAD_REQUEST, NOT_FOUND, INTERNAL_SERVER_ERROR, AUTHORIZATION_ERROR, DUBLICATE_ERROR } = require('../utils/constants');
 const User = require('../models/user');
 
 module.exports.getAllUsers = (req, res) => {
@@ -30,11 +30,11 @@ module.exports.createUser = (req, res) => {
       avatar: user.avatar,
     }))
     .catch((err) => {
-      if (err.name === 'ValidationError' || err.message === 'Illegal arguments: undefined, number'|| err.message === 'Illegal arguments: number, undefined') {
+      if (err.name === 'ValidationError' || err.message === 'Illegal arguments: undefined, number' || err.message === 'Illegal arguments: number, undefined') {
         return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя.' });
       }
       if (err.code === 11000) {
-        return res.status(409).send({ message: `Пользователь с email '${email}' уже существует.` });
+        return res.status(DUBLICATE_ERROR).send({ message: `Пользователь с email '${email}' уже существует.` });
       }
       return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка по умолчанию.' });
     });
@@ -50,13 +50,13 @@ module.exports.login = (req, res) => {
       });
     })
     .catch((err) => {
-      if (err.name === 'ValidationError' || err.message === 'Illegal arguments: undefined, number'|| err.message === 'Illegal arguments: number, undefined') {
+      if (err.name === 'ValidationError' || err.message === 'Illegal arguments: undefined, number' || err.message === 'Illegal arguments: number, undefined') {
         return res.status(BAD_REQUEST).send({ message: 'Неправильные почта или пароль' });
       }
-			if (err.message === 'DoesntExist') {
-        return res.status(401).send({ message: 'Неправильные почта или пароль' });
+      if (err.message === 'DoesntExist') {
+        return res.status(AUTHORIZATION_ERROR).send({ message: 'Неправильные почта или пароль' });
       }
-      return res.status(INTERNAL_SERVER_ERROR).send(err.message);
+      return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка по умолчанию.' });
     });
 };
 
