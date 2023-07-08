@@ -27,23 +27,19 @@ module.exports.createCard = (req, res, next) => {
 
 module.exports.deleteCard = (req, res, next) => {
   const { cardId } = req.params;
-
   Card.findById({ _id: cardId })
     .populate('owner')
-    .then((cardInfo) => {
-      if (cardInfo) {
-        if (cardInfo.owner.toString() === req.user._id) {
-          Card.findByIdAndRemove(cardId)
-            .then((card) => {
-              if (card) {
-                res.status(200).send({ data: card });
-              }
-            })
-            .catch((err) => next(err));
-        } else { next(new ForbiddenError('Отсутствие прав на удаление карточки.')); }
-      } else {
+    .then((card) => {
+      if (card.owner.toString() !== req.user._id) {
+        throw new ForbiddenError('Отсутствие прав на удаление карточки.');
+      }
+      if (!card) {
         throw new NotFoundError('Карточка по указанному id не найдена');
       }
+      return Card.findByIdAndRemove(cardId)
+        .then(() => {
+          res.send({ data: card });
+        });
     })
     .catch((err) => {
       if (err.kind === 'ObjectId') {
