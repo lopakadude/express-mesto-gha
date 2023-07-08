@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
 const auth = require('./middlewares/auth');
+const centralError = require('./middlewares/centralError');
 
 const app = express();
 
@@ -30,6 +31,9 @@ app.use('*', auth, (req, res) => {
   res.status(404).send({ message: 'Страница не существует' });
 });
 
+app.use(centralError);
+
 app.listen(PORT, () => {
+  // eslint-disable-next-line no-console
   console.log(`App listening on port ${PORT}`);
 });

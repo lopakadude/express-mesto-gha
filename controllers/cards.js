@@ -1,101 +1,99 @@
-const { BAD_REQUEST, NOT_FOUND, INTERNAL_SERVER_ERROR } = require('../utils/constants');
+const ValidationError = require('../errors/ValidationError');
+const NotFoundError = require('../errors/NotFoundError');
+const ForbiddenError = require('../errors/ForbiddenError');
 const Card = require('../models/card');
 
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
     .populate('owner')
     .then((cards) => res.send({ data: cards }))
-    .catch(() => res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка по умолчанию.' }));
+    .catch(next);
 };
 
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.status(201).send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные при обновлении профиля.' });
+        next(new ValidationError(
+          'Переданы некорректные данные при создании карточки.',
+        ));
+      } else {
+        next(err);
       }
-      return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка по умолчанию.' });
     });
 };
 
-module.exports.deleteCard = (req, res) => {
+module.exports.deleteCard = (req, res, next) => {
   const { cardId } = req.params;
   Card.findById({ _id: cardId })
-    .orFail(new Error('NotFound'))
+    .orFail(new NotFoundError('Карточка по указанному id не найдена'))
     .populate('owner')
     .then((card) => {
       if (card.owner.toString() !== req.user._id) {
-        return new Error('ForbiddenAction');
+        throw new ForbiddenError('Отсутствие прав на удаление карточки.');
       }
       return Card.findByIdAndRemove(cardId)
         .then(() => {
-          res.status(200).send({ data: card });
+          res.send({ data: card });
         });
     })
     .catch((err) => {
       if (err.kind === 'ObjectId') {
-        return res.status(BAD_REQUEST).send({ message: 'Некорректный формат id.' });
+        next(new ValidationError('Некорректный формат id.'));
+      } else {
+        next(err);
       }
-      if (err.message === 'NotFound') {
-        return res.status(NOT_FOUND).send({ message: 'Карточка по указанному _id не найдена' });
-      }
-      if (err.message === 'ForbiddenAction') {
-        return res.status(NOT_FOUND).send({ message: 'Отсутствие прав на удаление карточки.' });
-      }
-      return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка по умолчанию.' });
     });
 };
 
-module.exports.addLike = (req, res) => {
+module.exports.addLike = (req, res, next) => {
   const { cardId } = req.params;
   Card.findByIdAndUpdate(
     { _id: cardId },
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
-    .orFail(new Error('NotFound'))
+    .orFail(new NotFoundError('Карточка по указанному id не найдена'))
     .populate('owner')
     .then((card) => {
-      res.status(200).send({ data: card });
+      res.send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
+        next(new ValidationError(
+          'Переданы некорректные данные для постановки/снятии лайка.',
+        ));
+      } else if (err.kind === 'ObjectId') {
+        next(new ValidationError('Некорректный формат id.'));
+      } else {
+        next(err);
       }
-      if (err.kind === 'ObjectId') {
-        return res.status(BAD_REQUEST).send({ message: 'Некорректный формат id.' });
-      }
-      if (err.message === 'NotFound') {
-        return res.status(NOT_FOUND).send({ message: 'Карточка по указанному _id не найдена' });
-      }
-      return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка по умолчанию.' });
     });
 };
 
-module.exports.removeLike = (req, res) => {
+module.exports.removeLike = (req, res, next) => {
   const { cardId } = req.params;
   Card.findByIdAndUpdate(
     { _id: cardId },
     { $pull: { likes: req.user._id } },
     { new: true },
   )
-    .orFail(new Error('NotFound'))
+    .orFail(new NotFoundError('Карточка по указанному id не найдена'))
     .populate('owner')
     .then((card) => {
-      res.status(200).send({ data: card });
+      res.send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(BAD_REQUEST).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
+        next(new ValidationError(
+          'Переданы некорректные данные для постановки/снятии лайка.',
+        ));
+      } else if (err.kind === 'ObjectId') {
+        next(new ValidationError('Некорректный формат id.'));
+      } else {
+        next(err);
       }
-      if (err.kind === 'ObjectId') {
-        return res.status(BAD_REQUEST).send({ message: 'Некорректный формат id.' });
-      }
-      if (err.message === 'NotFound') {
-        return res.status(NOT_FOUND).send({ message: 'Карточка по указанному _id не найдена' });
-      }
-      return res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка по умолчанию.' });
     });
 };
