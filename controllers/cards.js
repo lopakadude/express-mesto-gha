@@ -27,20 +27,22 @@ module.exports.createCard = (req, res, next) => {
 
 module.exports.deleteCard = (req, res, next) => {
   const { cardId } = req.params;
+
   Card.findById({ _id: cardId })
     .populate('owner')
     .then((cardInfo) => {
-      if (cardInfo.owner.toString() === req.user._id) {
-        Card.findByIdAndRemove(cardId)
-          .then((card) => {
-            if (!card) {
-              throw new NotFoundError('Карточка по указанному id не найдена');
-            }
-            res.status(200);
-          })
-          .catch((err) => next(err));
+      if (cardInfo) {
+        if (cardInfo.owner.toString() === req.user._id) {
+          Card.findByIdAndRemove(cardId)
+            .then((card) => {
+              if (card) {
+                res.status(200).send({ data: card });
+              }
+            })
+            .catch((err) => next(err));
+        } else { next(new ForbiddenError('Отсутствие прав на удаление карточки.')); }
       } else {
-        throw new ForbiddenError('Отсутствие прав на удаление карточки.');
+        throw new NotFoundError('Карточка по указанному id не найдена');
       }
     })
     .catch((err) => {
