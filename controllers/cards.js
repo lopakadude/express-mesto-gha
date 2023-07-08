@@ -1,4 +1,4 @@
-const ValidationError = require('../errors/ValidationError');
+const BadRequest = require('../errors/BadRequest');
 const NotFoundError = require('../errors/NotFoundError');
 const ForbiddenError = require('../errors/ForbiddenError');
 const Card = require('../models/card');
@@ -16,7 +16,7 @@ module.exports.createCard = (req, res, next) => {
     .then((card) => res.status(201).send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new ValidationError(
+        next(new BadRequest(
           'Переданы некорректные данные при создании карточки.',
         ));
       } else {
@@ -28,11 +28,13 @@ module.exports.createCard = (req, res, next) => {
 module.exports.deleteCard = (req, res, next) => {
   const { cardId } = req.params;
   Card.findById({ _id: cardId })
-    .orFail(new NotFoundError('Карточка по указанному id не найдена'))
     .populate('owner')
     .then((card) => {
       if (card.owner.toString() !== req.user._id) {
         throw new ForbiddenError('Отсутствие прав на удаление карточки.');
+      }
+      if (!card) {
+        throw new NotFoundError('Карточка по указанному id не найдена');
       }
       return Card.findByIdAndRemove(cardId)
         .then(() => {
@@ -41,7 +43,7 @@ module.exports.deleteCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err.kind === 'ObjectId') {
-        next(new ValidationError('Некорректный формат id.'));
+        next(new BadRequest('Некорректный формат id.'));
       } else {
         next(err);
       }
@@ -55,18 +57,20 @@ module.exports.addLike = (req, res, next) => {
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
-    .orFail(new NotFoundError('Карточка по указанному id не найдена'))
     .populate('owner')
     .then((card) => {
+      if (!card) {
+        throw new NotFoundError('Карточка по указанному id не найдена');
+      }
       res.send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new ValidationError(
+        next(new BadRequest(
           'Переданы некорректные данные для постановки/снятии лайка.',
         ));
       } else if (err.kind === 'ObjectId') {
-        next(new ValidationError('Некорректный формат id.'));
+        next(new BadRequest('Некорректный формат id.'));
       } else {
         next(err);
       }
@@ -80,18 +84,20 @@ module.exports.removeLike = (req, res, next) => {
     { $pull: { likes: req.user._id } },
     { new: true },
   )
-    .orFail(new NotFoundError('Карточка по указанному id не найдена'))
     .populate('owner')
     .then((card) => {
+      if (!card) {
+        throw new NotFoundError('Карточка по указанному id не найдена');
+      }
       res.send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new ValidationError(
+        next(new BadRequest(
           'Переданы некорректные данные для постановки/снятии лайка.',
         ));
       } else if (err.kind === 'ObjectId') {
-        next(new ValidationError('Некорректный формат id.'));
+        next(new BadRequest('Некорректный формат id.'));
       } else {
         next(err);
       }
