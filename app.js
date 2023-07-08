@@ -4,7 +4,6 @@ const helmet = require('helmet');
 const { celebrate, Joi } = require('celebrate');
 const { errors } = require('celebrate');
 const auth = require('./middlewares/auth');
-const centralError = require('./middlewares/centralError');
 
 const app = express();
 
@@ -47,8 +46,6 @@ app.use('*', auth, (req, res) => {
 
 app.use(errors());
 app.use(require('./middlewares/centralError'));
-
-app.use(centralError);
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console

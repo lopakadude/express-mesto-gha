@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
+Joi.objectId = require('joi-objectid')(Joi);
 const {
   getAllUsers, getUser, getCurrentUser, updateUserInfo, updateUserAvatar,
 } = require('../controllers/users');
