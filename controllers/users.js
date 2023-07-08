@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const { BAD_REQUEST, NOT_FOUND, INTERNAL_SERVER_ERROR, AUTHORIZATION_ERROR, DUBLICATE_ERROR } = require('../utils/constants');
+const {
+  BAD_REQUEST, NOT_FOUND, INTERNAL_SERVER_ERROR, AUTHORIZATION_ERROR, DUBLICATE_ERROR,
+} = require('../utils/constants');
 const User = require('../models/user');
 
 module.exports.getAllUsers = (req, res) => {
