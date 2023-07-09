@@ -1,17 +1,18 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
-const { celebrate, Joi } = require('celebrate');
 const { errors } = require('celebrate');
 const auth = require('./middlewares/auth');
+const NotFoundError = require('./errors/NotFoundError');
+const celebrates = require('./middlewares/celebrates');
 
 const app = express();
 
-const { PORT = 3000 } = process.env;
+const { PORT = 3000, DB_URL = 'mongodb://127.0.0.1:27017/mestodb' } = process.env;
 
 const { createUser, login } = require('./controllers/users');
 
-mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
+mongoose.connect(DB_URL, {
   useNewUrlParser: true,
 });
 
@@ -19,29 +20,16 @@ app.use(helmet());
 
 app.use(express.json());
 
-app.post('/signin', celebrate({
-  body: Joi.object().keys({
-    email: Joi.string().required().email(),
-    password: Joi.string().required(),
-  }),
-}), login);
+app.post('/signin', celebrates.login, login);
 
-app.post('/signup', celebrate({
-  body: Joi.object().keys({
-    email: Joi.string().required().email(),
-    password: Joi.string().required(),
-    name: Joi.string().min(2).max(30),
-    about: Joi.string().min(2).max(30),
-    avatar: Joi.string().regex(/^(https?:\/\/)?(www\.)?([A-Za-zА-Яа-я0-9]{1}[A-Za-zА-Яа-я0-9-]*\.?)*\.{1}[A-Za-zА-Яа-я0-9-]{2,8}(\/([\w#!:.?+=&%@!\-/])*)?/im),
-  }),
-}), createUser);
+app.post('/signup', celebrates.createUser, createUser);
 
 app.use('/users', auth, require('./routes/users'));
 
 app.use('/cards', auth, require('./routes/cards'));
 
-app.use('*', auth, (req, res) => {
-  res.status(404).send({ message: 'Страница не существует' });
+app.use('*', (req, res, next) => {
+  next(new NotFoundError('Маршрут не найден'));
 });
 
 app.use(errors());
