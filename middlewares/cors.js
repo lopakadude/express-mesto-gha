@@ -1,5 +1,3 @@
-const fs = require('fs');
-
 const allowedCors = [
   'http://express.lopakadude.nomoredomains.xyz',
   'https://express.lopakadude.nomoredomains.xyz',
@@ -10,7 +8,6 @@ const DEFAULT_ALLOWED_METHODS = 'GET,HEAD,PUT,PATCH,POST,DELETE';
 
 const cors = (req, res, next) => {
   const { origin } = req.headers;
-  fs.appendFileSync('test', origin);
   const { method } = req;
   const requestHeaders = req.headers['access-control-request-headers'];
 
