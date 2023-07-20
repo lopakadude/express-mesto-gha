@@ -1,9 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
-const { errors } = require('celebrate');
 const auth = require('./middlewares/auth');
-const NotFoundError = require('./errors/NotFoundError');
+const { errors } = require('celebrate');
 const celebrates = require('./middlewares/celebrates');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const cors = require('./middlewares/cors');
@@ -30,13 +29,7 @@ app.post('/signin', celebrates.login, login);
 
 app.post('/signup', celebrates.createUser, createUser);
 
-app.use('/users', auth, require('./routes/users'));
-
-app.use('/cards', auth, require('./routes/cards'));
-
-app.use('*', (req, res, next) => {
-  next(new NotFoundError('Маршрут не найден'));
-});
+app.use('/', auth, require('./routes/index'));
 
 app.use(errorLogger);
 
