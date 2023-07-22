@@ -13,7 +13,7 @@ module.exports.getCards = (req, res, next) => {
 module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
-    .then((card) => res.status(201).send({ card }))
+    .then((card) => res.status(201).send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequest(
@@ -33,7 +33,7 @@ module.exports.deleteCard = (req, res, next) => {
     .then((cardInfo) => {
       if (cardInfo) {
         if (cardInfo.owner._id.toString() === userId) {
-          Card.findByIdAndRemove({ cardId })
+          Card.findByIdAndRemove({ _id: cardId })
             .then((card) => {
               if (card) {
                 res.send({ cardId });
@@ -57,7 +57,7 @@ module.exports.deleteCard = (req, res, next) => {
 module.exports.addLike = (req, res, next) => {
   const { cardId } = req.params;
   Card.findByIdAndUpdate(
-    { cardId },
+    { _id: cardId },
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
@@ -66,7 +66,7 @@ module.exports.addLike = (req, res, next) => {
       if (!card) {
         throw new NotFoundError('Карточка по указанному id не найдена');
       }
-      res.send({ card });
+      res.send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -84,7 +84,7 @@ module.exports.addLike = (req, res, next) => {
 module.exports.removeLike = (req, res, next) => {
   const { cardId } = req.params;
   Card.findByIdAndUpdate(
-    { cardId },
+    { _id: cardId },
     { $pull: { likes: req.user._id } },
     { new: true },
   )
