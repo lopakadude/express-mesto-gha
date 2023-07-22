@@ -5,7 +5,6 @@ const Card = require('../models/card');
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
-    .populate('owner')
     .then((cards) => res.send({ data: cards }))
     .catch(next);
 };
@@ -62,7 +61,6 @@ module.exports.addLike = (req, res, next) => {
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
-    .populate('owner')
     .then((card) => {
       if (!card) {
         throw new NotFoundError('Карточка по указанному id не найдена');
@@ -89,7 +87,6 @@ module.exports.removeLike = (req, res, next) => {
     { $pull: { likes: req.user._id } },
     { new: true },
   )
-    .populate('owner')
     .then((card) => {
       if (!card) {
         throw new NotFoundError('Карточка по указанному id не найдена');
