@@ -19,7 +19,7 @@ const cardSchema = new mongoose.Schema({
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'user',
-    required: [true, 'Поле "owner" должно быть заполнено'],
+    required: true,
   },
   likes: {
     type: [
