@@ -49,7 +49,7 @@ module.exports.login = (req, res, next) => {
   return User.findUserByCredentials(email, password)
     .then((user) => {
       res.send({
-        token: jwt.sign({ _id: user._id }, process.env.NODE_ENV !== 'production' ? 'super-strong-secret' : process.env.JWT_SECRET, { expiresIn: '7d' }),
+        token: jwt.sign({ _id: user._id }, process.env.NODE_ENV !== 'production' ? 'super-secret' : process.env.JWT_SECRET, { expiresIn: '7d' }),
       });
     })
     .catch(() => next(new AuthorizationError('Авторизация не пройдена. Неверный почта или пароль')));
@@ -60,7 +60,7 @@ module.exports.getUser = (req, res, next) => {
   User.findById(userId)
     .then((user) => {
       if (!user) {
-        next(new NotFoundError('Пользователь по указанному id не найден'));
+        throw new NotFoundError('Пользователь по указанному id не найден');
       }
       res.send({ data: user });
     })
