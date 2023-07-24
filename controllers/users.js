@@ -52,7 +52,7 @@ module.exports.login = (req, res, next) => {
         token: jwt.sign({ _id: user._id }, process.env.NODE_ENV !== 'production' ? 'super-secret' : process.env.JWT_SECRET, { expiresIn: '7d' }),
       });
     })
-    .catch(() => next(new AuthorizationError('Авторизация не пройдена. Неверный почта или пароль')));
+    .catch((err) => next(err));
 };
 
 module.exports.getUser = (req, res, next) => {
