@@ -5,7 +5,7 @@ module.exports = (req, res, next) => {
   const { authorization } = req.headers;
 
   if (!authorization || !authorization.startsWith('Bearer ')) {
-    throw new AuthorizationError('Авторизация не пройдена1. Неверный почта или пароль');
+    throw new AuthorizationError('Авторизация не пройдена. Неверный почта или пароль');
   }
   const token = authorization.replace('Bearer ', '');
   let payload;
@@ -13,7 +13,7 @@ module.exports = (req, res, next) => {
   try {
     payload = jwt.verify(token, process.env.NODE_ENV !== 'production' ? 'super-strong-secret' : process.env.JWT_SECRET);
   } catch (err) {
-    next(new AuthorizationError(token));
+    next(new AuthorizationError('Авторизация не пройдена. Неверный почта или пароль'));
   }
   req.user = payload;
   return next();
