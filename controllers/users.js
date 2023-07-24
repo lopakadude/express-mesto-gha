@@ -64,7 +64,7 @@ module.exports.getUser = (req, res, next) => {
       res.send({ data: user });
     })
     .catch((err) => {
-      if (err.kind === 'ObjectId') {
+      if (err.name === 'CastError') {
         next(new BadRequest('Некорректный формат id.'));
       } else {
         next(err);
@@ -81,11 +81,7 @@ module.exports.getCurrentUser = (req, res, next) => {
       res.send({ data: user });
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new BadRequest('Некорректный id пользователя'));
-      } else {
-        next(err);
-      }
+      next(err);
     });
 };
 

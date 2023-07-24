@@ -22,20 +22,20 @@ module.exports.createUser = celebrate({
 
 module.exports.getUser = celebrate({
   params: Joi.object().keys({
-    userId: Joi.objectId(),
+    userId: Joi.objectId().required(),
   }),
 });
 
 module.exports.updateUser = celebrate({
   body: Joi.object().keys({
-    name: Joi.string().min(2).max(30),
-    about: Joi.string().min(2).max(30),
+    name: Joi.string().min(2).max(30).required(),
+    about: Joi.string().min(2).max(30).required(),
   }),
 });
 
 module.exports.updateAvatar = celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().regex(regexUrl),
+    avatar: Joi.string().regex(regexUrl).required(),
   }),
 });
 
@@ -48,6 +48,6 @@ module.exports.createCard = celebrate({
 
 module.exports.checkIdCard = celebrate({
   params: Joi.object().keys({
-    cardId: Joi.objectId(),
+    cardId: Joi.objectId().required(),
   }),
 });

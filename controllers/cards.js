@@ -33,7 +33,7 @@ module.exports.deleteCard = (req, res, next) => {
     .then((cardInfo) => {
       if (cardInfo) {
         if (cardInfo.owner._id.toString() === userId) {
-          Card.findByIdAndRemove({ _id: cardId })
+          Card.deleteOne({ _id: cardId })
             .then((card) => {
               if (card) {
                 res.send({ data: cardId });
@@ -46,7 +46,7 @@ module.exports.deleteCard = (req, res, next) => {
       }
     })
     .catch((err) => {
-      if (err.kind === 'ObjectId') {
+      if (err.name === 'CastError') {
         next(new BadRequest('Некорректный формат id.'));
       } else {
         next(err);
@@ -68,12 +68,10 @@ module.exports.addLike = (req, res, next) => {
       res.send({ data: card });
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'CastError') {
         next(new BadRequest(
           'Переданы некорректные данные для постановки/снятии лайка.',
         ));
-      } else if (err.kind === 'ObjectId') {
-        next(new BadRequest('Некорректный формат id.'));
       } else {
         next(err);
       }
@@ -94,12 +92,10 @@ module.exports.removeLike = (req, res, next) => {
       res.send({ data: card });
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'CastError') {
         next(new BadRequest(
           'Переданы некорректные данные для постановки/снятии лайка.',
         ));
-      } else if (err.kind === 'ObjectId') {
-        next(new BadRequest('Некорректный формат id.'));
       } else {
         next(err);
       }
