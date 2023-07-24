@@ -13,7 +13,7 @@ module.exports = (req, res, next) => {
   try {
     payload = jwt.verify(token, process.env.NODE_ENV !== 'production' ? 'super-strong-secret' : process.env.JWT_SECRET);
   } catch (err) {
-    return next(new AuthorizationError('Авторизация не пройдена. Неверный почта или пароль'));
+    next(new AuthorizationError('Авторизация не пройдена. Неверный почта или пароль'));
   }
   req.user = payload;
   return next();
