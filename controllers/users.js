@@ -86,30 +86,38 @@ module.exports.getCurrentUser = (req, res, next) => {
     });
 };
 
-function updateUser(req, res, next, data) {
-  User.findByIdAndUpdate(req.user._id, data, { runValidators: true, context: 'query', new: true })
+module.exports.updateUserInfo = (req, res, next) => {
+  const { name, about } = req.body;
+  User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true, context: 'query' })
     .then((user) => {
-      if (user) {
-        res.send({ data: user });
-      } else { throw new NotFoundError('Пользователь с указанным _id не найден.'); }
+      if (!user) {
+        throw new NotFoundError('Пользователь по указанному id не найден');
+      }
+      res.send({ data: user });
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
-        next(new BadRequest('Переданы некорректные данные при обновлении пользовтателя'));
+        next(new BadRequest('Переданы некорректные данные при обновлении профиля.'));
       } else {
         next(err);
       }
     });
-}
-
-module.exports.updateUserInfo = (req, res, next) => {
-  const { name, about } = req.body;
-
-  updateUser(req, res, next, { name, about });
 };
 
-module.exports.updateAvatar = (req, res, next) => {
+module.exports.updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
-
-  updateUser(req, res, next, { avatar });
+  User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true, context: 'query' })
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Пользователь по указанному id не найден');
+      }
+      res.send({ data: user });
+    })
+    .catch((err) => {
+      if (err instanceof mongoose.Error.ValidationError) {
+        next(new BadRequest('Переданы некорректные данные при обновлении профиля.'));
+      } else {
+        next(err);
+      }
+    });
 };
