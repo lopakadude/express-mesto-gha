@@ -6,39 +6,6 @@ const BadRequest = require('../errors/BadRequest');
 const NotFoundError = require('../errors/NotFoundError');
 const User = require('../models/user');
 
-function updateUser(req, res, next, data) {
-  User.findByIdAndUpdate(req.user._id, data, { runValidators: true, context: 'query', new: true })
-    .then((user) => {
-      if (user) {
-        res.send({ data: user });
-      } else { throw new NotFoundError('Пользователь с указанным _id не найден.'); }
-    })
-    .catch((err) => {
-      if (err instanceof mongoose.Error.ValidationError) {
-        next(new BadRequest('Переданы некорректные данные при обновлении пользовтателя'));
-      } else {
-        next(err);
-      }
-    });
-}
-
-function getAnyUser(req, res, next, data) {
-  User.findById(data)
-    .then((user) => {
-      if (!user) {
-        throw new NotFoundError('Пользователь по указанному id не найден');
-      }
-      res.send({ data: user });
-    })
-    .catch((err) => {
-      if (err instanceof mongoose.Error.CastError) {
-        next(new BadRequest('Некорректный формат id.'));
-      } else {
-        next(err);
-      }
-    });
-}
-
 module.exports.getAllUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send({ data: users }))
@@ -90,12 +57,50 @@ module.exports.login = (req, res, next) => {
 
 module.exports.getUser = (req, res, next) => {
   const { userId } = req.params;
-  getAnyUser(req, res, next, userId);
+  User.findById(userId)
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Пользователь по указанному id не найден');
+      }
+      res.send({ data: user });
+    })
+    .catch((err) => {
+      if (err instanceof mongoose.Error.CastError) {
+        next(new BadRequest('Некорректный формат id.'));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports.getCurrentUser = (req, res, next) => {
-  getAnyUser(req, res, next, req.user._id);
+  User.findById(req.user._id)
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Пользователь по указанному id не найден');
+      }
+      res.send({ data: user });
+    })
+    .catch((err) => {
+      next(err);
+    });
 };
+
+function updateUser(req, res, next, data) {
+  User.findByIdAndUpdate(req.user._id, data, { runValidators: true, context: 'query', new: true })
+    .then((user) => {
+      if (user) {
+        res.send({ data: user });
+      } else { throw new NotFoundError('Пользователь с указанным _id не найден.'); }
+    })
+    .catch((err) => {
+      if (err instanceof mongoose.Error.ValidationError) {
+        next(new BadRequest('Переданы некорректные данные при обновлении пользовтателя'));
+      } else {
+        next(err);
+      }
+    });
+}
 
 module.exports.updateUserInfo = (req, res, next) => {
   const { name, about } = req.body;
