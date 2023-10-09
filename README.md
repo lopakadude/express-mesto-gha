@@ -1,5 +1,7 @@
  [![Tests](../../actions/workflows/tests-14-sprint.yml/badge.svg)](../../actions/workflows/tests-14-sprint.yml)
-# Бекенд работы Mesto на курсе веб-разработки Яндекс Практикум.
+# express-mesro-gha
+
+Бекенд работы Mesto на курсе веб-разработки Яндекс Практикум.
 
 ## Директории
 
