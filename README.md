@@ -1,5 +1,5 @@
  [![Tests](../../actions/workflows/tests-14-sprint.yml/badge.svg)](../../actions/workflows/tests-14-sprint.yml)
-# express-mesro-gha
+# express-mesto-gha
 
 Бекенд работы Mesto на курсе веб-разработки Яндекс Практикум.
 
