@@ -1,5 +1,5 @@
  [![Tests](../../actions/workflows/tests-14-sprint.yml/badge.svg)](../../actions/workflows/tests-14-sprint.yml)
-# Проект Mesto бэкенд
+# Бекенд работы Mesto на курсе веб-разработки Яндекс Практикум.
 
 ## Директории
 
@@ -11,6 +11,22 @@
 
 ## Запуск проекта
 
-`npm run start` — запускает сервер   
-`npm run dev` — запускает сервер с hot-reload
+Для запуска проекта необходимо выполнить следующие действия:
+
+1. Склонировать проект на ваш компьютер с [Github](https://github.com/lopakadude/movies-explorer-api) с помощью команды:
+```
+git clone git@github.com:lopakadude/movies-explorer-api.git
+```
+2. Установить зависимости:
+```
+npm install
+```
+3. Запустить проект:
+```
+npm run start
+```
+4. Запустить проект c hot-reload:
+```
+npm run dev
+```
 
